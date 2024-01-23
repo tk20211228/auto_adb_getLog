@@ -1,14 +1,18 @@
 ■ 概要
-　ADBコマンドで、apkファイルをインストールさせることを、バッチ処理で自動化しました。
+　ADBコマンドのlogcatで、端末ログを取得するプロジェクトです。
+　adb_install_usb.ps1をPowerShellで実行すると、プロジェクト直下のlogフォルダにログが格納されます。
+　事前に、ADBコマンドの実行環境を構築を実施してください。
 
-■ 仕様
-　「auto_adb_install」フォルダに格納されているapkファイルは全て自動インストールされるように処理されます。
-　　処理の流れとしては、以下の通りです。
-　　1.「adb devices」コマンドが実行され、ADB接続か可能状態になっているデバイスのシリアル番号が表示される
-　　　※「～～～～　　devices」となっていれば、成功。「～～～～　　offline」となっていれば、正常ではありません。
-　　2.「auto_adb_install」フォルダに格納されているapk形式ファイルがピックアップされ。「adb install」が実行されます。
-　　3.アプリのインストール成功・失敗にかかわらず、「ファイル名　install OK」と表示される
-　　4.全てのアプリがインストールが終了したら、「TestArribute」が起動します。
+■ 環境構築
+　　1.以下にURLを開き、[SDK Platform-Tools for Windows をダウンロード]を押下し、利用規約に同意し、Android SDK Platform-Toolsのダウンロードしてください。
+　　　https://developer.android.com/studio/releases/platform-tools?hl=ja
+
+　　2.ダウンロードしたzipファルダを、本プロジェクト直下に,ファルダ名を「platform-tools」で解凍してください。
+　　　※通常、ファルダ名は「platform-tools」で自動で生成されます。
+　　　※別名で解凍された場合、ファルダ名を「platform-tools」に変更してください。
+
+　　3.「platform-tools_push_create.bat」を実行してください。
+　　4.Windowsメニューからコマンドプロンプトを起動し、"adb version"を実行して、バーションが表示されれば、環境構築は完了です。
 　　
 ■ 使い方
 　　[事前準備]
