@@ -1,7 +1,10 @@
 @echo off
 
 :: Check for admin privileges
-net session >nul 2>&1
+@REM net session >nul 2>&1
+
+net session
+
 if %errorlevel% neq 0 (
   echo Please run the script as an administrator.
   pause >nul
