@@ -10,24 +10,24 @@ function Get-DeviceProperty {
     return (adb shell getprop $property).Replace(" ", "_")
 }
 
-function Create-LogDirectory {
+function New-LogDirectory {
     param (
         [string]$model
     )
 
-    $logdir = Create-LogPath $model
+    $logdir = New-LogPath $model
 
     if (!(Test-Path -Path $logdir)) {
         $dir = New-Item -ItemType Directory -Path $logdir
         $logdir = $dir.FullName
     }
 
-    Write-Host "Create-LogDirectory: $logdir"
+    Write-Host "New-LogDirectory: $logdir"
 
     return $logdir
 }
 
-function Create-LogPath {
+function New-LogPath {
     param (
         [string]$model
     )
@@ -62,12 +62,12 @@ $model = Get-DeviceProperty "ro.product.model"
 
 Write-Host "Device: $deviceId, Model: $model"
 
-$logdir = Create-LogDirectory $model
+$logdir = New-LogDirectory $model
 Write-Host "Log directory: $logdir"
 
 Start-Logcat $deviceId $logdir $model
 
-echo "Press any key to stop logcat..."
+Write-Host "Press any key to stop logcat..."
 pause
 
 adb kill-server
