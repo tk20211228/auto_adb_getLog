@@ -43,6 +43,21 @@ function New-LogPath {
     return Join-Path -Path $PSScriptRoot -ChildPath ("log\" + $model + "\$(GetCurrentTimestamp)")
 }
 
+
+function Get-DeviceList {
+    param (
+        [hashtable]$properties
+    )
+
+    $deviceInfo = @{}
+    foreach ($property in $properties.Keys) {
+        $deviceInfo[$property] = Get-DeviceProperty $properties[$property]
+        Write-Host "${property}: $($deviceInfo[$property])"
+    }
+
+    return $deviceInfo
+}
+
 # Logcatを開始する関数
 function Start-Logcat {
     param (
@@ -79,8 +94,8 @@ function Test-DeviceConnected {
             exit
         }
     }
-    Write-Host $output
-    Write-Host "OK"
+    # Write-Host $output
+    # Write-Host "OK"
 }
 
 # スクリプトの実行初期段階で、端末が認識されているか確認
@@ -97,21 +112,36 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 }
 
 
-# デバイスIDとモデルを取得
-$deviceId = Get-DeviceProperty "ro.serialno"
-$model = Get-DeviceProperty "ro.product.model"
+$properties = @{
+    deviceId = "ro.serialno"
+    model = "ro.product.model"
+    sdkVersion = "ro.build.version.sdk"
+    OS = "ro.build.version.release"
+    buildName = "ro.build.display.id"
+    buildDate = "ro.build.date"
+    manufacturer = "ro.product.manufacturer"
+    brand = "ro.product.brand"
+    productName = "ro.product.name"
+    hardware = "ro.hardware"
+    bootloader = "ro.bootloader"
+    checkjni = "ro.kernel.android.checkjni"
+    secure = "ro.secure"
+}
 
-Write-Host "Device: $deviceId, Model: $model"
+$deviceList = Get-DeviceList $properties
 
 # ログディレクトリを作成
-$logdir = New-LogDirectory $model
-Write-Host "Log directory: $logdir"
+$logdir = New-LogDirectory $deviceList.model
+# Write-Host "Log directory: $logdir"
 
+# 端末情報を取得
+# Get-DeviceInfo $deviceId $logdir $model
 # Logcatを開始
-Start-Logcat $deviceId $logdir $model
+Start-Logcat $deviceList.deviceId $logdir $deviceList.model
+
 
 Write-Host "Press any key to stop logcat..."
-pause
+pause > null 
 
 # adbサーバーを停止
 adb kill-server
