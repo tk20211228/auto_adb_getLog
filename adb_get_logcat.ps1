@@ -58,6 +58,27 @@ function Get-DeviceList {
     return $deviceInfo
 }
 
+function TEST-LockedBootComplete {
+    param (
+        [string]$deviceId
+    )
+
+    # adb logcatコマンドを使用して最新のログを取得
+    $log = adb -s $deviceId logcat -d
+
+    # ログを行ごとに分割し、配列を逆順にする
+    $logLines = $log -split "`n" | Sort-Object -Descending
+
+    # ログに"LOCKED_BOOT_COMPLETE"が含まれているかを確認
+    $matchedLog = $logLines | Where-Object { $_ -match "LOCKED_BOOT_COMPLETED" } | Select-Object -First 1
+    if ($matchedLog) {
+        Write-Host "LOCKED_BOOT_COMPLETED is found in the log:"
+        Write-Host $matchedLog
+    } else {
+        Write-Host "LOCKED_BOOT_COMPLETED is not found in the log."
+    }
+}
+
 # Logcatを開始する関数
 function Start-Logcat {
     param (
@@ -94,8 +115,6 @@ function Test-DeviceConnected {
             exit
         }
     }
-    # Write-Host $output
-    # Write-Host "OK"
 }
 
 # スクリプトの実行初期段階で、端末が認識されているか確認
@@ -128,20 +147,24 @@ $properties = @{
     secure = "ro.secure"
 }
 
+# デバイス情報を取得
 $deviceList = Get-DeviceList $properties
 
 # ログディレクトリを作成
 $logdir = New-LogDirectory $deviceList.model
-# Write-Host "Log directory: $logdir"
 
-# 端末情報を取得
-# Get-DeviceInfo $deviceId $logdir $model
+# デバイス情報をJSON形式で保存
+$jsonFilePath = Join-Path -Path $logdir -ChildPath "deviceInfo.json"
+$deviceList | ConvertTo-Json -Depth 100 | Set-Content -Path $jsonFilePath
+
+# デバイスIDを指定して関数を呼び出す
+TEST-LockedBootComplete $deviceList.deviceId
+
 # Logcatを開始
 Start-Logcat $deviceList.deviceId $logdir $deviceList.model
 
-
 Write-Host "Press any key to stop logcat..."
-pause > null 
+pause
 
 # adbサーバーを停止
 adb kill-server
